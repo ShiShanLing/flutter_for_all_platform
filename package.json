@@ -1,0 +1,17 @@
+{
+    "name": "i-gsk-mobile-admin-web-js",
+    "version": "0.0.0",
+    "scripts": {
+      "web run":"flutter run -d chrome",
+      "web build ": "flutter build web --base-href=/flutterTest.github.io/",
+      "iOS build": "flutter build ipa --release",
+      "iOS run":"flutter run -d ios",
+      "Android build": "flutter build apk",
+      "Android run":"flutter run -d android",
+      "MacOS build": "flutter build macos",
+      "MacOS run":"flutter run -d macos",
+      "Windows build": "flutter build windows",
+      "Windows run":"flutter run -d web"
+      
+    }
+}

@@ -1,6 +1,37 @@
+var testCode = """
+  onClickSearch() {
+    console.log("this.qcFilterObjc.doctor===", this.qcFilterObjc.doctor);
+    console.log("this.qcFilterObjc.mr===", this.qcFilterObjc.mr);
+    console.log("this.qcFilterObjc.callId===", this.qcFilterObjc.callId);
+    const isNotEmpty = this.qcFilterObjc.mr || this.qcFilterObjc.doctor || this.qcFilterObjc.callId;
+    //如果不是空 并且,还没开始全局搜索.
+    if (isNotEmpty && !this.isGlobalSearch) {
+      this.isGlobalSearch = true;
+            //深拷贝对象
+      let qcFilterObjc =  cloneDeep(this.qcFilterObjc);
+      //那么就
+      this.qcFilterObjc = {
+        selectDates: null,
+        qcState: undefined,
+        callType: undefined,
+        qcResult: undefined,
+        dateFast: '',
+        mr: qcFilterObjc.mr,
+        doctor: qcFilterObjc.doctor,
+        callId: qcFilterObjc.callId,
+        IQCSearchStr: '',
+        //质检员
+        IQC: undefined,
+      }
+    }
+    //点击搜索
+    this.getQcList();
+  }
+  """;
+
 var exampleMap = {
   'js': """
-//点击搜索按钮
+
   onClickSearch() {
     console.log("this.qcFilterObjc.doctor===", this.qcFilterObjc.doctor);
     console.log("this.qcFilterObjc.mr===", this.qcFilterObjc.mr);

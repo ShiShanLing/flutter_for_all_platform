@@ -11,7 +11,8 @@
       "MacOS build": "flutter build macos",
       "MacOS run":"flutter run -d macos",
       "Windows build": "flutter build windows",
-      "Windows run":"flutter run -d web"
+      "Windows run":"flutter run -d web",
+      "flutter pub run build_runner build":"flutter pub run build_runner build"
       
     }
 }

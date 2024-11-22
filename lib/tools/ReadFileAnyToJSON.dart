@@ -1,4 +1,5 @@
 //读取文件并转成json
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
@@ -56,8 +57,20 @@ class ReadFileAnyToJSONClass {
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls', 'xlsm', 'et', 'csv'],
     );
+    print("FilePickerResult=====$result");
     if (result != null) {
-      return result.files.first.bytes;
+      // 方式1：如果 withData: true 生效，直接使用 bytes
+      if (result.files.first.bytes != null) {
+        return result.files.first.bytes;
+      }
+
+      // 方式2：如果 bytes 为空，则从文件路径读取
+      //在 macOS/iOS 平台上，FilePicker 默认不会直接加载文件内容到内存中（bytes）。我们需要从文件路径读取内容：
+      final path = result.files.first.path;
+      if (path != null) {
+        final file = File(path);
+        return await file.readAsBytes();
+      }
     }
     return null;
   }
@@ -67,12 +80,14 @@ class ReadFileAnyToJSONClass {
       {required Uint8List bytes}) {
     Excel excel = Excel.decodeBytes(bytes);
     final List<Map<String, dynamic>> result = [];
-    final Map<String, dynamic> createMap = {};
+    Map<String, dynamic> createMap = {};
     final keys = <String>[];
     // get data from first sheet
     final int n = excel.tables[excel.tables.keys.first]?.rows.length ?? 0;
     // final List<Data?> rows in excel.tables[excel.tables.keys.first]!.rows
     for (int i = 0; i < n; i++) {
+      createMap = {};
+      print('createMap===$createMap');
       final rows = excel.tables[excel.tables.keys.first]!.rows[i];
       for (int j = 0; j < rows.length; j++) {
         // index = 0 it will show an header of sheet

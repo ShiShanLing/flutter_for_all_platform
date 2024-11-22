@@ -3,6 +3,7 @@ import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/theme_map.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'example_map.dart';
+import 'package:go_router/go_router.dart';
 
 const title = 'Flutter Highlight Gallery';
 
@@ -42,6 +43,11 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(title),
         actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.keyboard_return),
+              onPressed: () {
+                context.pop();
+              }),
           PopupMenuButton(
             child: _buildMenuContent(language),
             itemBuilder: (context) {

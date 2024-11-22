@@ -13,9 +13,12 @@ Future<void> validateDatabaseSchema(GeneratedDatabase database) async {
   //
   // For details, see: https://drift.simonbinder.eu/docs/advanced-features/migrations/#verifying-a-database-schema-at-runtime
   if (kDebugMode) {
-    final sqlite = await WasmSqlite3.loadFromUrl(Uri.parse('/sqlite3.wasm'));
-    sqlite.registerVirtualFileSystem(InMemoryFileSystem(), makeDefault: true);
-
-    await VerifySelf(database).validateDatabaseSchema(sqlite3: sqlite);
+    print('VerifySelf(database).validateDatabaseSchema()');
+    // final sqlite = await WasmSqlite3.loadFromUrl(Uri.parse('sqlite3.wasm'));
+    // sqlite.registerVirtualFileSystem(InMemoryFileSystem(), makeDefault: true);
+    final sqlite = await WasmSqlite3.loadFromUrl(Uri.parse('sqlite3.wasm'));
+    final fileSystem = await IndexedDbFileSystem.open(dbName: 'my_app');
+    sqlite.registerVirtualFileSystem(fileSystem, makeDefault: true);
+    await VerifySelf(database).validateDatabaseSchema();
   }
 }

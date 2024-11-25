@@ -28,7 +28,7 @@ class PreviewQuestionsPage extends StatelessWidget {
             onPressed: () {
               // TODO: 确认导入题库
             },
-            child: Text('确认导入', style: TextStyle(color: Colors.white)),
+            child: Text('确认导入', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),

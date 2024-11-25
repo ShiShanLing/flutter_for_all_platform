@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
 import 'package:my_app/main.dart';
 //路由管理
-import 'package:go_router/go_router.dart';
 
 import 'package:desktop_window/desktop_window.dart';
-import 'package:my_app/tools/ReadFileAnyToJSON.dart';
-import 'package:my_app/tools/platform.dart';
+import 'package:my_app/Head/head.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -170,40 +170,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   // MARK: 添加新科目
-  void _showAddSubjectDialog() {
-    showDialog(
+  void _showAddSubjectDialog() async {
+    final result = await showTextInputDialog(
       context: context,
-      builder: (context) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: Text('添加新科目'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: '科目名称',
-              hintText: '请输入科目名称',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  setState(() {
-                    subjects.add(controller.text);
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: Text('添加'),
-            ),
-          ],
-        );
-      },
+      title: '添加新科目',
+      textFields: [
+        DialogTextField(
+          hintText: '请输入科目名称',
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return '科目名称不能为空';
+            }
+            return null;
+          },
+        ),
+      ],
     );
+    if (result != null) {
+      String subjectName = result[0]; // 获取第一个输入框的值
+      print('输入的科目名称: $subjectName');
+      insertNewLearningType(subjectName, (() async {
+        print('触发回调');
+        context.loaderOverlay.hide();
+        toastification.show(
+          style: ToastificationStyle.flatColored,
+          alignment: Alignment.center,
+          context: context, // optional if you use ToastificationWrapper
+          title: Text('添加成功'),
+          showProgressBar: false,
+          autoCloseDuration: const Duration(milliseconds: 1300),
+        );
+      }));
+    } else {}
   }
 
   //重置当前科目的学习记录
@@ -234,31 +232,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   // MARK: 导入新题
-  inputNewTopic() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: Text('请确认导入的题目类型.'),
-          content: Text('目前导入的是"$selectedSubject"题目.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('再想想'),
-            ),
-            ElevatedButton(
-              //导入简答题和答案.存到本地
-              onPressed: () {
-                selectFile();
-                Navigator.pop(context);
-              },
-              child: Text('选择文件'),
-            ),
-          ],
-        );
-      },
-    );
+  inputNewTopic() async {
+    final result = await showOkCancelAlertDialog(
+        context: context,
+        title: '请确认导入的题目类型.',
+        message: '目前导入的是"$selectedSubject"题目.',
+        okLabel: '选择文件',
+        cancelLabel: '再想想');
+    print("result===$result");
+    if (result == OkCancelResult.ok) {
+      selectFile();
+    }
   }
 
   // MARK: 选择文件
@@ -292,4 +276,75 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  // MARK: database 操作
+
+  insertNewLearningType(String name, VoidCallback callBack) async {
+    context.loaderOverlay.show();
+
+    print("开始操作");
+    //插入新科目
+    final dbHelper = DatabaseHelper();
+
+    // 插入科目
+    final subjectId = await dbHelper.insertSubject(name, null);
+
+    // 获取所有科目
+    final subjects = await dbHelper.getAllSubjects();
+    for (var subject in subjects) {
+      print('科目: ${subject['name']} id:${subject['id']}');
+    }
+
+    // 获取某个类型系下所有的题目
+    // final questions = await dbHelper.getQuestionsBySubject(subjectId);
+
+    // 使用完后关闭数据库
+    await dbHelper.close();
+    print('插入完成');
+    callBack();
+  }
+
+  // MARK: loading
+  _showSingleAnimationDialog(
+      //试着弹框
+      BuildContext context,
+      Indicator indicator,
+      bool showPathBackground) {
+    print('_showSingleAnimationDialog-context---$context');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: false,
+        builder: (ctx) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(indicator.toString().split('.').last),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(64),
+              child: Center(
+                child: LoadingIndicator(
+                  indicatorType: indicator,
+                  colors: _kDefaultRainbowColors,
+                  strokeWidth: 4.0,
+                  pathBackgroundColor:
+                      showPathBackground ? Colors.black45 : null,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
+
+const List<Color> _kDefaultRainbowColors = const [
+  Colors.red,
+  Colors.orange,
+  Colors.yellow,
+  Colors.green,
+  Colors.blue,
+  Colors.indigo,
+  Colors.purple,
+];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:my_app/excel_read/excel_read.dart';
 import 'package:my_app/flutter_highlight_demo/flutter_highlight_demo.dart';
 import 'package:my_app/pages/home-page/HomePage.dart';
@@ -9,9 +10,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:desktop_window/desktop_window.dart';
 
+import 'package:my_app/Head/common_func.dart';
+
 // import './drift/screens/home.dart';
 import './drift/screens/search.dart';
 import './pages/question-page/QuestionPage.dart';
+//toast
+import 'package:toastification/toastification.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +39,8 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(
         path: '/',
-        builder: (_, __) => HomePage(),
+        builder: (_, __) => LoaderOverlay(
+            overlayColor: kColor(49, 49, 49, 0.6), child: HomePage()),
         routes: [
           GoRoute(
             path: 'search',
@@ -70,13 +76,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
-      child: MaterialApp.router(
-        title: 'Drift Todos',
-        theme: ThemeData(
-          primarySwatch: Colors.amber,
-          typography: Typography.material2018(),
+      child: ToastificationWrapper(
+        config: ToastificationConfig(),
+        child: MaterialApp.router(
+          title: 'Drift Todos',
+          theme: ThemeData(
+            primarySwatch: Colors.amber,
+            typography: Typography.material2018(),
+          ),
+          routerConfig: _router,
         ),
-        routerConfig: _router,
       ),
     );
   }
